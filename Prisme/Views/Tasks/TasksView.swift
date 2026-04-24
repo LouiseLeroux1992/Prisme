@@ -5,6 +5,7 @@ enum TaskFilter: String, CaseIterable {
     case today = "Aujourd'hui"
     case upcoming = "Prochainement"
     case all = "Toutes"
+    case done = "Complétées"
 }
 
 struct TasksView: View {
@@ -30,6 +31,8 @@ struct TasksView: View {
                             upcomingView
                         case .all:
                             allView
+                        case .done:
+                            doneView
                         }
                     }
                     .padding(.horizontal)
@@ -65,16 +68,17 @@ struct TasksView: View {
 
     private var todayView: some View {
         VStack(alignment: .leading, spacing: 16) {
-            let todayTasks = tasksForToday
+            let todayTodo = tasksForToday.filter { !$0.isCompleted }
+            let todayDone = tasksForToday.filter { $0.isCompleted }
             let overdue = overdueTasks
 
-            if todayTasks.isEmpty && overdue.isEmpty {
+            if todayTodo.isEmpty && todayDone.isEmpty && overdue.isEmpty {
                 emptyState("Rien pour aujourd'hui")
             }
 
-            if !todayTasks.isEmpty {
-                taskCountLabel("\(todayTasks.filter { !$0.isCompleted }.count) à faire · \(todayTasks.filter { $0.isCompleted }.count) fait")
-                taskListCard(todayTasks)
+            if !todayTodo.isEmpty || !todayDone.isEmpty {
+                taskCountLabel("\(todayTodo.count) à faire · \(todayDone.count) fait")
+                taskListCard(todayTodo + todayDone)
             }
 
             if !overdue.isEmpty {
@@ -103,12 +107,12 @@ struct TasksView: View {
     private var allView: some View {
         VStack(alignment: .leading, spacing: 16) {
             let overdue = overdueTasks
-            let today = tasksForToday
+            let todayItems = tasksForToday.filter { !$0.isCompleted }
             let upcoming = upcomingTasks
             let later = laterTasks
 
-            if tasks.isEmpty {
-                emptyState("Aucune tâche")
+            if tasks.filter({ !$0.isCompleted }).isEmpty {
+                emptyState("Aucune tâche en cours")
             }
 
             if !overdue.isEmpty {
@@ -116,9 +120,9 @@ struct TasksView: View {
                 taskListCard(overdue)
             }
 
-            if !today.isEmpty {
-                sectionHeader("AUJOURD'HUI · \(today.count)", color: .primary)
-                taskListCard(today)
+            if !todayItems.isEmpty {
+                sectionHeader("AUJOURD'HUI · \(todayItems.count)", color: .primary)
+                taskListCard(todayItems)
             }
 
             if !upcoming.isEmpty {
@@ -129,6 +133,21 @@ struct TasksView: View {
             if !later.isEmpty {
                 sectionHeader("PLUS TARD · \(later.count)", color: .primary)
                 taskListCard(later)
+            }
+        }
+    }
+
+    // MARK: - Done View
+
+    private var doneView: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            let completedTasks = tasks.filter { $0.isCompleted }.sorted { $0.deadline > $1.deadline }
+
+            if completedTasks.isEmpty {
+                emptyState("Aucune tâche complétée")
+            } else {
+                taskCountLabel("\(completedTasks.count) tâche\(completedTasks.count > 1 ? "s" : "") complétée\(completedTasks.count > 1 ? "s" : "")")
+                taskListCard(completedTasks)
             }
         }
     }
@@ -167,10 +186,7 @@ struct TasksView: View {
     private func taskListCard(_ taskList: [PrismeTask]) -> some View {
         VStack(spacing: 0) {
             ForEach(Array(taskList.enumerated()), id: \.element.id) { index, task in
-                NavigationLink(destination: TaskDetailView(task: task)) {
-                    taskRow(task)
-                }
-                .buttonStyle(.plain)
+                taskRow(task)
 
                 if index < taskList.count - 1 {
                     Divider()
@@ -193,24 +209,28 @@ struct TasksView: View {
                     .font(.title2)
                     .foregroundStyle(task.isCompleted ? accentColor : Color.gray.opacity(0.3))
             }
-            .buttonStyle(.plain)
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(task.title)
-                    .font(.body)
-                    .foregroundStyle(task.isCompleted ? .secondary : .primary)
-                    .strikethrough(task.isCompleted)
+            NavigationLink(destination: TaskDetailView(task: task)) {
+                HStack(spacing: 0) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(task.title)
+                            .font(.body)
+                            .foregroundStyle(task.isCompleted ? .secondary : .primary)
+                            .strikethrough(task.isCompleted)
 
-                Text(deadlineLabel(task.deadline))
-                    .font(.caption)
-                    .foregroundStyle(isOverdue(task) ? .red : .secondary)
+                        Text(deadlineLabel(task.deadline))
+                            .font(.caption)
+                            .foregroundStyle(isOverdue(task) ? .red : .secondary)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(Color(.systemGray3))
+                }
             }
-
-            Spacer()
-
-            Image(systemName: "chevron.right")
-                .font(.caption)
-                .foregroundStyle(Color(.systemGray3))
+            .buttonStyle(.plain)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)

@@ -15,19 +15,23 @@ struct HabitRowView: View {
                     .font(.title2)
                     .foregroundStyle(habit.isDone(on: Date()) ? accentColor : Color.gray.opacity(0.3))
             }
+
+            NavigationLink(destination: HabitDetailView(habit: habit)) {
+                HStack(spacing: 12) {
+                    Text(habit.name)
+                        .font(.body)
+                        .foregroundStyle(.primary)
+
+                    Spacer()
+
+                    miniWeekBars
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(Color(.systemGray3))
+                }
+            }
             .buttonStyle(.plain)
-
-            Text(habit.name)
-                .font(.body)
-                .foregroundStyle(.primary)
-
-            Spacer()
-
-            miniWeekBars
-
-            Image(systemName: "chevron.right")
-                .font(.caption)
-                .foregroundStyle(Color(.systemGray3))
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)

@@ -7,13 +7,14 @@ struct MantrasView: View {
     @State private var currentIndex = 0
     @State private var showingEditor = false
 
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         ZStack {
             LinearGradient(
-                colors: [
-                    Color(red: 0.92, green: 0.82, blue: 0.95),
-                    Color(red: 0.96, green: 0.84, blue: 0.90)
-                ],
+                colors: colorScheme == .dark
+                    ? [Color(red: 0.25, green: 0.15, blue: 0.35), Color(red: 0.3, green: 0.15, blue: 0.25)]
+                    : [Color(red: 0.92, green: 0.82, blue: 0.95), Color(red: 0.96, green: 0.84, blue: 0.90)],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -29,7 +30,7 @@ struct MantrasView: View {
                             .font(.body)
                             .foregroundStyle(Color(red: 0.35, green: 0.2, blue: 0.55))
                             .padding(10)
-                            .background(.white.opacity(0.6))
+                            .background(.white.opacity(colorScheme == .dark ? 0.15 : 0.6))
                             .clipShape(Circle())
                     }
                     .padding(.trailing, 20)
@@ -42,7 +43,7 @@ struct MantrasView: View {
                     Text("Aucun mantra")
                         .font(.title2)
                         .italic()
-                        .foregroundStyle(Color(red: 0.35, green: 0.2, blue: 0.55).opacity(0.5))
+                        .foregroundStyle(colorScheme == .dark ? Color.white.opacity(0.3) : Color(red: 0.35, green: 0.2, blue: 0.55).opacity(0.5))
                 } else {
                     TabView(selection: $currentIndex) {
                         ForEach(Array(mantras.enumerated()), id: \.element.id) { index, mantra in
@@ -50,7 +51,7 @@ struct MantrasView: View {
                                 .font(.system(size: 28, weight: .regular, design: .serif))
                                 .italic()
                                 .multilineTextAlignment(.center)
-                                .foregroundStyle(Color(red: 0.35, green: 0.2, blue: 0.55))
+                                .foregroundStyle(colorScheme == .dark ? Color(red: 0.78, green: 0.68, blue: 0.92) : Color(red: 0.35, green: 0.2, blue: 0.55))
                                 .padding(.horizontal, 40)
                                 .tag(index)
                         }

@@ -26,6 +26,7 @@ struct TrackerView: View {
                 .padding(.bottom, 80)
             }
             .background(Color(.systemGroupedBackground))
+            .navigationTitle("Tracker")
             .overlay(alignment: .bottomTrailing) {
                 addButton
             }
@@ -47,15 +48,10 @@ struct TrackerView: View {
                 .fontWeight(.bold)
                 .foregroundStyle(accentColor)
 
-            Text(today.formatted(.dateTime.day().month(.abbreviated).locale(frLocale)))
-                .font(.largeTitle)
-                .fontWeight(.bold)
-
             Text("\(doneCountToday) / \(totalHabitsCount) habitudes aujourd'hui")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
-        .padding(.top, 8)
     }
 
     // MARK: - Category Section
@@ -71,10 +67,7 @@ struct TrackerView: View {
             VStack(spacing: 0) {
                 let sortedHabits = category.habits.sorted { $0.createdAt < $1.createdAt }
                 ForEach(Array(sortedHabits.enumerated()), id: \.element.id) { index, habit in
-                    NavigationLink(destination: HabitDetailView(habit: habit)) {
-                        HabitRowView(habit: habit, accentColor: accentColor)
-                    }
-                    .buttonStyle(.plain)
+                    HabitRowView(habit: habit, accentColor: accentColor)
 
                     if index < sortedHabits.count - 1 {
                         Divider()

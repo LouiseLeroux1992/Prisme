@@ -48,7 +48,9 @@ struct ExerciceDetailView: View {
                 }
             }
             .padding(.horizontal)
+            .padding(.bottom, 300)
         }
+        .scrollDismissesKeyboard(.interactively)
         .background(Color(.systemGroupedBackground))
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {

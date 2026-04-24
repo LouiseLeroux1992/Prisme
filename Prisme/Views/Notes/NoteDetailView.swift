@@ -49,7 +49,9 @@ struct NoteDetailView: View {
                 }
             }
             .padding(.horizontal)
+            .padding(.bottom, 300)
         }
+        .scrollDismissesKeyboard(.interactively)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             if let note = note {

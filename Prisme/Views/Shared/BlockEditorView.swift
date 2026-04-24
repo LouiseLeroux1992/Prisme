@@ -79,7 +79,7 @@ struct BlockEditorView: View {
     // MARK: - Checklist Row
 
     private func checklistRow(index: Int, block: ContentBlock) -> some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .center, spacing: 10) {
             Button {
                 blocks[index].isChecked.toggle()
             } label: {
@@ -88,9 +88,8 @@ struct BlockEditorView: View {
                     .foregroundStyle(block.isChecked ? checkColor : Color.gray.opacity(0.4))
             }
             .buttonStyle(.plain)
-            .padding(.top, 10)
 
-            TextField("", text: blockTextBinding(index: index), axis: .vertical)
+            TextField("", text: blockTextBinding(index: index))
                 .font(.body)
                 .strikethrough(block.isChecked)
                 .foregroundStyle(block.isChecked ? .secondary : .primary)
