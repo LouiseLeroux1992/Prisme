@@ -1,10 +1,3 @@
-//
-//  PrismeApp.swift
-//  Prisme
-//
-//  Created by Louise Leroux on 24/04/2026.
-//
-
 import SwiftUI
 import SwiftData
 
@@ -12,7 +5,14 @@ import SwiftData
 struct PrismeApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            HabitCategory.self,
+            Habit.self,
+            HabitEntry.self,
+            Mantra.self,
+            Note.self,
+            Exercise.self,
+            PrismeTask.self,
+            ChecklistItem.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 

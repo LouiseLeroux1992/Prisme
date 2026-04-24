@@ -1,66 +1,34 @@
-//
-//  ContentView.swift
-//  Prisme
-//
-//  Created by Louise Leroux on 24/04/2026.
-//
-
 import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
+        TabView {
+            Tab("Tâches", systemImage: "checkmark.circle") {
+                TasksView()
             }
-#if os(macOS)
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-#endif
-            .toolbar {
-#if os(iOS)
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-#endif
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
-            }
-        } detail: {
-            Text("Select an item")
-        }
-    }
 
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
+            Tab("Mantras", systemImage: "sparkles") {
+                MantrasView()
+            }
 
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+            Tab("Exercices", systemImage: "brain.head.profile") {
+                ExercicesListView()
+            }
+
+            Tab("Notes", systemImage: "note.text") {
+                NotesListView()
+            }
+
+            Tab("Tracker", systemImage: "chart.bar.fill") {
+                TrackerView()
             }
         }
+        .tint(Color(red: 0.95, green: 0.6, blue: 0.35))
     }
 }
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+        .modelContainer(for: [HabitCategory.self, Habit.self, HabitEntry.self, Mantra.self, Note.self, Exercise.self, PrismeTask.self], inMemory: true)
 }
