@@ -3,7 +3,7 @@ import SwiftData
 
 enum TaskFilter: String, CaseIterable {
     case today = "Aujourd'hui"
-    case upcoming = "Prochainement"
+    case upcoming = "Bientôt"
     case all = "Toutes"
     case done = "Complétées"
 }
@@ -126,7 +126,7 @@ struct TasksView: View {
             }
 
             if !upcoming.isEmpty {
-                sectionHeader("PROCHAINEMENT · \(upcoming.count)", color: .primary)
+                sectionHeader("BIENTÔT · \(upcoming.count)", color: .primary)
                 taskListCard(upcoming)
             }
 
