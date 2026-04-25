@@ -9,7 +9,7 @@ struct NoteDetailView: View {
     @State private var createdNote: Note?
 
     @State private var title: String = ""
-    @State private var blocks: [ContentBlock] = []
+    @State private var content: String = ""
     @State private var showingDeleteConfirmation = false
 
     private let accentColor = Color(red: 0.9, green: 0.72, blue: 0.25)
@@ -30,7 +30,13 @@ struct NoteDetailView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                BlockEditorView(blocks: $blocks)
+                TextEditor(text: $content)
+                    .font(.body)
+                    .frame(minHeight: 200)
+                    .scrollContentBackground(.hidden)
+                    .padding(12)
+                    .background(Color(.systemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
 
                 if !isNewNote {
                     Button(role: .destructive) {
@@ -56,7 +62,7 @@ struct NoteDetailView: View {
         .onAppear {
             if let note = note {
                 title = note.title
-                blocks = note.blocks
+                content = note.content
             }
         }
         .onDisappear {
@@ -74,23 +80,21 @@ struct NoteDetailView: View {
     }
 
     private func save() {
-        let nonEmptyBlocks = blocks.filter { !$0.text.isEmpty }
-        if title.isEmpty && nonEmptyBlocks.isEmpty {
+        if title.isEmpty && content.isEmpty {
             return
         }
 
         if let note = note {
             note.title = title
-            note.blocks = blocks
+            note.content = content
             note.updatedAt = Date()
         } else if createdNote == nil {
-            let newNote = Note(title: title)
-            newNote.blocks = blocks
+            let newNote = Note(title: title, content: content)
             modelContext.insert(newNote)
             createdNote = newNote
         } else if let created = createdNote {
             created.title = title
-            created.blocks = blocks
+            created.content = content
             created.updatedAt = Date()
         }
     }

@@ -9,9 +9,12 @@ struct ExerciceDetailView: View {
     @State private var createdExercise: Exercise?
 
     @State private var title: String = ""
-    @State private var blocks: [ContentBlock] = []
+    @State private var notes: String = ""
+    @State private var link: String = ""
     @State private var showingDeleteConfirmation = false
+    @State private var showingLinkField = false
 
+    private let accentColor = Color(red: 0.35, green: 0.7, blue: 0.45)
     private let frLocale = Locale(identifier: "fr_FR")
 
     private var isNewExercise: Bool { exercise == nil }
@@ -29,7 +32,15 @@ struct ExerciceDetailView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                BlockEditorView(blocks: $blocks)
+                TextEditor(text: $notes)
+                    .font(.body)
+                    .frame(minHeight: 150)
+                    .scrollContentBackground(.hidden)
+                    .padding(12)
+                    .background(Color(.systemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                linkSection
 
                 if !isNewExercise {
                     Button(role: .destructive) {
@@ -56,7 +67,9 @@ struct ExerciceDetailView: View {
         .onAppear {
             if let exercise = exercise {
                 title = exercise.title
-                blocks = exercise.notesBlocks
+                notes = exercise.notes
+                link = exercise.link
+                showingLinkField = !exercise.link.isEmpty
             }
         }
         .onDisappear {
@@ -73,23 +86,55 @@ struct ExerciceDetailView: View {
         }
     }
 
+    @ViewBuilder
+    private var linkSection: some View {
+        if showingLinkField || !link.isEmpty {
+            HStack(spacing: 10) {
+                Image(systemName: "link")
+                    .foregroundStyle(accentColor)
+
+                TextField("https://...", text: $link)
+                    .keyboardType(.URL)
+                    .autocapitalization(.none)
+                    .textContentType(.URL)
+            }
+            .padding(12)
+            .background(Color(.systemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        } else {
+            Button {
+                showingLinkField = true
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "link")
+                        .foregroundStyle(accentColor)
+                    Text("Ajouter un lien")
+                        .foregroundStyle(.secondary)
+                }
+                .padding(12)
+                .background(Color(.systemBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+        }
+    }
+
     private func save() {
-        let nonEmptyBlocks = blocks.filter { !$0.text.isEmpty || $0.isTable }
-        if title.isEmpty && nonEmptyBlocks.isEmpty {
+        if title.isEmpty && notes.isEmpty && link.isEmpty {
             return
         }
 
         if let exercise = exercise {
             exercise.title = title
-            exercise.notesBlocks = blocks
+            exercise.notes = notes
+            exercise.link = link
         } else if createdExercise == nil {
-            let newExercise = Exercise(title: title)
-            newExercise.notesBlocks = blocks
+            let newExercise = Exercise(title: title, notes: notes, link: link)
             modelContext.insert(newExercise)
             createdExercise = newExercise
         } else if let created = createdExercise {
             created.title = title
-            created.notesBlocks = blocks
+            created.notes = notes
+            created.link = link
         }
     }
 

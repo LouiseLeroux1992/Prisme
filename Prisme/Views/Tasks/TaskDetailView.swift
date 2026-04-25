@@ -6,9 +6,7 @@ struct TaskDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Bindable var task: PrismeTask
 
-    @State private var blocks: [ContentBlock] = []
     @State private var showingDeleteConfirmation = false
-    @State private var hasLoadedBlocks = false
 
     private let accentColor = Color(red: 0.2, green: 0.6, blue: 1.0)
     private let frLocale = Locale(identifier: "fr_FR")
@@ -28,7 +26,13 @@ struct TaskDetailView: View {
                         .foregroundStyle(.secondary)
                         .fontWeight(.semibold)
 
-                    BlockEditorView(blocks: $blocks)
+                    TextEditor(text: $task.taskDescription)
+                        .font(.body)
+                        .frame(minHeight: 100)
+                        .scrollContentBackground(.hidden)
+                        .padding(12)
+                        .background(Color(.systemBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
 
                 toggleButton
@@ -49,18 +53,11 @@ struct TaskDetailView: View {
                 .padding(.top, 8)
             }
             .padding(.horizontal)
+            .padding(.bottom, 300)
         }
+        .scrollDismissesKeyboard(.interactively)
         .background(Color(.systemGroupedBackground))
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            if !hasLoadedBlocks {
-                blocks = task.descriptionBlocks
-                hasLoadedBlocks = true
-            }
-        }
-        .onDisappear {
-            task.descriptionBlocks = blocks
-        }
         .alert("Supprimer cette tâche ?", isPresented: $showingDeleteConfirmation) {
             Button("Annuler", role: .cancel) {}
             Button("Supprimer", role: .destructive) {
