@@ -7,6 +7,10 @@ struct HabitDetailView: View {
     let habit: Habit
 
     @State private var showingDeleteConfirmation = false
+    @State private var showingRename = false
+    @State private var editedName = ""
+    @State private var showingChangeCategory = false
+    @Query(sort: \HabitCategory.order) private var categories: [HabitCategory]
 
     private let accentColor = Color(red: 0.95, green: 0.6, blue: 0.35)
     private let frLocale = Locale(identifier: "fr_FR")
@@ -23,7 +27,6 @@ struct HabitDetailView: View {
 
                 heatmapSection
                 journalSection
-                deleteSection
             }
             .padding(.horizontal)
             .padding(.bottom, 40)
@@ -31,6 +34,30 @@ struct HabitDetailView: View {
         .background(Color(.systemGroupedBackground))
         .navigationTitle(habit.name)
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Button {
+                        editedName = habit.name
+                        showingRename = true
+                    } label: {
+                        Label("Renommer", systemImage: "pencil")
+                    }
+                    Button {
+                        showingChangeCategory = true
+                    } label: {
+                        Label("Changer de catégorie", systemImage: "folder")
+                    }
+                    Button(role: .destructive) {
+                        showingDeleteConfirmation = true
+                    } label: {
+                        Label("Supprimer", systemImage: "trash")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
+            }
+        }
         .alert("Supprimer cette habitude ?", isPresented: $showingDeleteConfirmation) {
             Button("Annuler", role: .cancel) {}
             Button("Supprimer", role: .destructive) {
@@ -39,6 +66,44 @@ struct HabitDetailView: View {
             }
         } message: {
             Text("L'habitude et tout son historique seront supprimés.")
+        }
+        .alert("Renommer", isPresented: $showingRename) {
+            TextField("Nom", text: $editedName)
+            Button("Annuler", role: .cancel) {}
+            Button("OK") {
+                habit.name = editedName
+            }
+        }
+        .sheet(isPresented: $showingChangeCategory) {
+            NavigationStack {
+                List(categories) { category in
+                    Button {
+                        habit.category = category
+                        showingChangeCategory = false
+                    } label: {
+                        HStack {
+                            Text(category.icon)
+                            Text(category.name)
+                                .foregroundStyle(.primary)
+                            Spacer()
+                            if habit.category?.id == category.id {
+                                Image(systemName: "checkmark")
+                                    .foregroundStyle(accentColor)
+                            }
+                        }
+                    }
+                }
+                .navigationTitle("Catégorie")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Fermer") {
+                            showingChangeCategory = false
+                        }
+                    }
+                }
+            }
+            .presentationDetents([.medium])
         }
     }
 
@@ -145,23 +210,6 @@ struct HabitDetailView: View {
         }
     }
 
-    // MARK: - Delete
-
-    private var deleteSection: some View {
-        Button(role: .destructive) {
-            showingDeleteConfirmation = true
-        } label: {
-            HStack {
-                Spacer()
-                Text("Supprimer l'habitude")
-                    .fontWeight(.medium)
-                Spacer()
-            }
-            .padding(.vertical, 12)
-            .background(Color(.systemBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-        }
-    }
 
     // MARK: - Helpers
 

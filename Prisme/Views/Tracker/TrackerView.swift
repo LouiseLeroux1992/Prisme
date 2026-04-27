@@ -4,7 +4,10 @@ import SwiftData
 struct TrackerView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \HabitCategory.order) private var categories: [HabitCategory]
+    @Query private var allEntries: [HabitEntry]
     @State private var showingNewHabit = false
+    @State private var categoryToRename: HabitCategory?
+    @State private var editedCategoryName = ""
 
     private let today = Date()
     private let accentColor = Color(red: 0.95, green: 0.6, blue: 0.35)
@@ -36,6 +39,17 @@ struct TrackerView: View {
             .onAppear {
                 seedDefaultDataIfNeeded()
             }
+            .alert("Renommer la catégorie", isPresented: Binding(
+                get: { categoryToRename != nil },
+                set: { if !$0 { categoryToRename = nil } }
+            )) {
+                TextField("Nom", text: $editedCategoryName)
+                Button("Annuler", role: .cancel) { categoryToRename = nil }
+                Button("OK") {
+                    categoryToRename?.name = editedCategoryName
+                    categoryToRename = nil
+                }
+            }
         }
     }
 
@@ -58,11 +72,22 @@ struct TrackerView: View {
 
     private func categorySectionView(_ category: HabitCategory) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(category.name.uppercased())
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fontWeight(.semibold)
-                .padding(.bottom, 8)
+            Button {
+                editedCategoryName = category.name
+                categoryToRename = category
+            } label: {
+                HStack(spacing: 4) {
+                    Text(category.name.uppercased())
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fontWeight(.semibold)
+                    Image(systemName: "pencil")
+                        .font(.system(size: 9))
+                        .foregroundStyle(.tertiary)
+                }
+            }
+            .buttonStyle(.plain)
+            .padding(.bottom, 8)
 
             VStack(spacing: 0) {
                 let sortedHabits = category.habits.sorted { $0.createdAt < $1.createdAt }
@@ -183,17 +208,21 @@ struct TrackerView: View {
         guard categories.isEmpty else { return }
 
         let bienEtre = HabitCategory(name: "Bien-être", icon: "🌿", order: 0)
-        let maison = HabitCategory(name: "Maison", icon: "🏠", order: 1)
+        let menage = HabitCategory(name: "Ménage", icon: "🧹", order: 1)
+        let arrosage = HabitCategory(name: "Arrosage", icon: "🌱", order: 2)
 
         modelContext.insert(bienEtre)
-        modelContext.insert(maison)
+        modelContext.insert(menage)
+        modelContext.insert(arrosage)
 
         let habits: [(String, HabitCategory)] = [
             ("Lavage de cheveux", bienEtre),
             ("Masque de cheveux", bienEtre),
             ("Séance de sport", bienEtre),
-            ("Arrosage des plantes", maison),
-            ("Ménage salle de bain", maison),
+            ("Cuisine", menage),
+            ("Salle de bain", menage),
+            ("Balcon", arrosage),
+            ("Plantes fragiles", arrosage),
         ]
 
         for (name, category) in habits {

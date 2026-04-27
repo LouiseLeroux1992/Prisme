@@ -14,7 +14,7 @@ struct TaskDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                Text(task.title)
+                TextField("Titre", text: $task.title)
                     .font(.largeTitle)
                     .fontWeight(.bold)
 
@@ -37,20 +37,6 @@ struct TaskDetailView: View {
 
                 toggleButton
 
-                Button(role: .destructive) {
-                    showingDeleteConfirmation = true
-                } label: {
-                    HStack {
-                        Spacer()
-                        Text("Supprimer la tâche")
-                            .fontWeight(.medium)
-                        Spacer()
-                    }
-                    .padding(.vertical, 12)
-                    .background(Color(.systemBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-                .padding(.top, 8)
             }
             .padding(.horizontal)
             .padding(.bottom, 300)
@@ -58,6 +44,19 @@ struct TaskDetailView: View {
         .scrollDismissesKeyboard(.interactively)
         .background(Color(.systemGroupedBackground))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Button(role: .destructive) {
+                        showingDeleteConfirmation = true
+                    } label: {
+                        Label("Supprimer", systemImage: "trash")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
+            }
+        }
         .alert("Supprimer cette tâche ?", isPresented: $showingDeleteConfirmation) {
             Button("Annuler", role: .cancel) {}
             Button("Supprimer", role: .destructive) {
@@ -69,16 +68,10 @@ struct TaskDetailView: View {
 
     private var infoCard: some View {
         VStack(spacing: 0) {
-            HStack {
-                Text("Deadline")
-                    .foregroundStyle(.primary)
-                Spacer()
-                Text(deadlineLabel(task.deadline))
-                    .foregroundStyle(.primary)
-                    .fontWeight(.medium)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            DatePicker("Deadline", selection: $task.deadline, displayedComponents: .date)
+                .environment(\.locale, Locale(identifier: "fr_FR"))
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
 
             Divider()
 
